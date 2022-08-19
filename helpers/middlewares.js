@@ -34,7 +34,7 @@ const adminsOnly = (req, res, next) => {
         next();
     }else{
         res.status(403).json({
-            message:"Admin privilages required to perform this action"
+            message:"Admin privileges required to perform this action"
         });
     }
 }
@@ -87,8 +87,6 @@ const   dataRequired = (req, res, next) => {
         return;
 
     }
-    
-    console.log("data is valid");
 
     next();
 

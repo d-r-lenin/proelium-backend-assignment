@@ -20,6 +20,7 @@ class UserControl {
         }
         const user = new this.Model(data);
         user.department =  user.department.toLocaleLowerCase();
+        // hashing the password using bcrypt
         user.password = await bcrypt.hash(user.password, saltRounds);
         await user.save();
         user.password = undefined;
@@ -57,7 +58,18 @@ class UserControl {
     }
 
     async update(id, data) {
-        await this.Model.findByIdAndUpdate(id, data);
+        //deleting any fields that are not allowed to be updated
+        delete data.password ;
+        delete data.createdAt;
+        delete data.updatedAt;
+        delete data.role;
+        try {
+	        await this.Model.findByIdAndUpdate(id, data);
+	        return this.getById(id);
+        } catch (e) {
+            console.log(e);
+            return null;
+        }
     }
 
     // checks if the given email and password are correct

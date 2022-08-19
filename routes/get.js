@@ -9,31 +9,39 @@ const { auth, adminsOnly } = require('../helpers/middlewares');
 
 //searching for a user by fields
 router.get('/one/by/fields', auth, async (req, res) => {
-    const fields = req.body.fields || req.query.fields;
-    const objectToSearch = req.body.searchBy;
-    if (req.user.role === 'user') {
-        objectToSearch.role = 'user';
-    }
-    console.log({
-        ...objectToSearch, 
-        // to make sure that only admin can search for admins
-    });
-    let user = await uc.getOneByFields({
-        ...objectToSearch, 
-        // to make sure that only admin can search for admins
-    });
-    
-    if (user === null) {
-        res.status(400).json({
-            message: "User not found"
+    try {
+        const fields = req.body.fields || req.query.fields;
+        const objectToSearch = req.body.searchBy;
+        if (req.user.role === 'user') {
+            objectToSearch.role = 'user';
+        }
+        console.log({
+            ...objectToSearch, 
+            // to make sure that only admin can search for admins
         });
-        return;
-    }
-    if(fields){
-        user = uc.filter(user,fields);
+        let user = await uc.getOneByFields({
+            ...objectToSearch, 
+            // to make sure that only admin can search for admins
+        });
+        
+        if (user === null) {
+            res.status(400).json({
+                message: "User not found"
+            });
+            return;
+        }
+        if(fields){
+            user = uc.filter(user,fields);
+        }
+    
+        res.status(200).json(user);
+    } catch (e) {
+        console.log(e);
+        res.status(500).json({
+            message: "Internal Server Error"
+        });
     }
 
-    res.status(200).json(user);
 });
 
 //searching for all users by fields
@@ -64,9 +72,10 @@ router.get('/all/by/fields', auth, async (req, res) => {
         
         res.status(200).json(results);
     }catch(e){
-        res.status(400).json({
-            message: e.message
-        })
+        console.log(e);
+        res.status(500).json({
+            message:"Internal Server Error"
+        });
     }
 });
 
@@ -85,7 +94,7 @@ router.get('/one/by/id/:id', auth, async (req, res) => {
             });
             return;
         }
-
+        //checks if the user has required privileges to get the data
         if(req.user.role !== 'admin' || user.role === 'admin'){
             res.status(403).json({
                 message:"Admin privilages required to perform this action"
@@ -100,8 +109,9 @@ router.get('/one/by/id/:id', auth, async (req, res) => {
         res.status(200).json(user);
 
     }catch(e){
-        res.status(400).json({
-            message:"Something went Wrong"
+        console.log(e);
+        res.status(500).json({
+            message:"Internal Server Error"
         });
     }
 });
@@ -118,8 +128,9 @@ router.get('/self', auth, async (req, res) => {
 
         res.status(200).json(user);
     }catch(e){
-        res.status(400).json({
-            message: "Something went wrong"
+        console.log(e);
+        res.status(500).json({
+            message:"Internal Server Error"
         });
     }
 });
@@ -151,8 +162,9 @@ router.get('/all/by/role/:role', auth, async(req, res) => {
         res.status(200).json(results);
 
     }catch(e){
-        res.status(400).json({
-            message: "No users found"
+        console.log(e);
+        res.status(500).json({
+            message:"Internal Server Error"
         });
     }
 });
@@ -177,8 +189,9 @@ router.get('/all',auth, adminsOnly, async(req,res)=>{
         res.status(200).json(results);
 
     }catch(e){
-        res.status(400).json({
-            message:"Something went wrong"
+        console.log(e);
+        res.status(500).json({
+            message:"Internal Server Error"
         });
     }
 })
@@ -192,7 +205,7 @@ router.post('/token', async (req,res)=>{
         const userData = await uc.check(email , password);
         //if not exist then throw error to catch block
         if(!userData.email) throw new Error(userData);
-        //genareting jwt token
+        //generating jwt token
         const token = jwt.sign({
                 id:userData._id,
                 role:userData.role
@@ -200,16 +213,17 @@ router.post('/token', async (req,res)=>{
             process.env.JWT_SECRET
         );
         
-        //send token to user
+        //send token to client
         res.status(200).json({
             token:token
         });
 
     }catch(e){
-        res.status(400).json({
-            message: e.message
+        console.log(e);
+        res.status(500).json({
+            message:"Internal Server Error"
         });
-    };
+    }
 });
 
 
