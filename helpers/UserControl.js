@@ -30,9 +30,22 @@ class UserControl {
         return this.Model.findById(id).select('-password').exec();
     }
 
-    async get(id) {
-        return this.Model.findById(id).select('-password').exec();
-    }
+    async getOneByFields(object){
+        try{
+            return this.Model.findOne(object).select('-password').exec();
+        }catch(e){
+            return null;
+        }
+	}
+
+
+    async getAllByFields(object){
+        try{
+            return this.Model.find(object).select('-password').exec();
+        }catch(e){
+            return null;
+        }	
+	}
 
     async getAll() {
         return this.Model.find().select('-password').exec();
@@ -51,10 +64,12 @@ class UserControl {
     async check(email, password) {
 
         const user = await this.Model.findOne({ email: email });
-        if (user === null) return null;
+        if (user === null) return "Email not found";
 
         const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) return null;
+        if (!isMatch) return "Wrong Password";
+
+        user.password = undefined;
 
         return user;
     }
@@ -83,6 +98,15 @@ class UserControl {
             return true
         }
     }
+
+    filter(user, fields) {
+        let result = {};
+        fields.forEach((field) => {
+            result[field] = user[field];
+        });
+        return result;
+    }
+
 
 }
 
