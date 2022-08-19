@@ -1,16 +1,15 @@
 const { model, Schema } = require('mongoose');
 
 
-
 const userSchema = new Schema({
-    first_name : {
+    firstName : {
         required: true,
         type: "string"
     },
-    middle_name : {
+    middleName : {
         type: "string"
     },
-    last_name : {
+    lastName : {
         required: true,
         type: "string"
     },
@@ -18,7 +17,7 @@ const userSchema = new Schema({
         required: true,
         type: "string"
     },
-    hash : {
+    password : {
         required: true,
         type: "string"
     },
