@@ -10,8 +10,9 @@ const { auth, adminsOnly } = require('../helpers/middlewares');
 //searching for a user by fields
 router.get('/one/by/fields', auth, async (req, res) => {
     try {
-        const fields = req.body.fields || req.query.fields;
-        const objectToSearch = req.body.searchBy;
+        const fields = req.query.fields;
+        delete req.query.fields;
+        const objectToSearch = req.query;
         if (req.user.role === 'user') {
             objectToSearch.role = 'user';
         }
@@ -46,8 +47,11 @@ router.get('/one/by/fields', auth, async (req, res) => {
 
 //searching for all users by fields
 router.get('/all/by/fields', auth, async (req, res) => {
-    const fields = req.body.fields;;
-    const objectToSearch = req.body.searchBy;
+    const fields = req.query.fields;
+    delete req.query.fields;
+    const objectToSearch = req.query;
+    console.log(objectToSearch);
+
     if (req.user.role === 'user') {
         objectToSearch.role = 'user';
     }
@@ -55,6 +59,7 @@ router.get('/all/by/fields', auth, async (req, res) => {
         const users = await uc.getAllByFields({
             ...objectToSearch
         });
+
         if (users === null) {
             res.status(400).json({
                 message: "Users not found"
@@ -63,9 +68,9 @@ router.get('/all/by/fields', auth, async (req, res) => {
         }
 
         let results;
-        //if users is an empty array then skipping the itaration
+        //if users is an empty array then skipping the iteration
         if(fields && users.length > 0){
-            results = users.forEach( user => uc.filter(user,fields) );
+            results = users.map( user => uc.filter(user,fields) );
         }else{
             results = users;
         }
@@ -83,11 +88,12 @@ router.get('/all/by/fields', auth, async (req, res) => {
 //to get a User or Admin by id
 router.get('/one/by/id/:id', auth, async (req, res) => {
     try{
-        const id = req.params.id || req.query.id || req.body.id;
-        const fields = req.body.fields; 
+        const id = req.params.id || req.query.id;
+        delete req.query.id;
+        const fields = req.query.fields; 
+
         let user = await uc.getById(id);
-        
-        
+        console.log(user);
         if (user === null) {
             res.status(400).json({
                 message: "User not found"
@@ -95,9 +101,9 @@ router.get('/one/by/id/:id', auth, async (req, res) => {
             return;
         }
         //checks if the user has required privileges to get the data
-        if(req.user.role !== 'admin' || user.role === 'admin'){
+        if(req.user.role !== 'admin' && user.role === 'admin'){
             res.status(403).json({
-                message:"Admin privilages required to perform this action"
+                message:"Admin privileges required to perform this action"
             });
             return;
         }
@@ -121,9 +127,10 @@ router.get('/one/by/id/:id', auth, async (req, res) => {
 router.get('/self', auth, async (req, res) => {
     try{
         let user = await uc.getById(req.user.id);
-        if(req.body.fields){
-            //if prefered fields are given
-            user = uc.filter(user, req.body.fields);
+
+        if(req.query.fields){
+            //if preferred fields are given
+            user = uc.filter(user, req.query.fields);
         }
 
         res.status(200).json(user);
@@ -137,8 +144,9 @@ router.get('/self', auth, async (req, res) => {
 
 //to get a User by Role
 router.get('/all/by/role/:role', auth, async(req, res) => {
-    const role = req.params.role || req.query.role || req.body.role;
-    const fields = req.body.fields;
+    const role = req.params.role || req.query.role;
+    
+    const fields = req.query.fields;
     
     let results;
     try{
@@ -173,7 +181,7 @@ router.get('/all/by/role/:role', auth, async(req, res) => {
 
 //get all users and admins
 router.get('/all',auth, adminsOnly, async(req,res)=>{
-    const { fields } = req.body;
+    const { fields } = req.query;
     let results;
     try{
         //check if user is admin

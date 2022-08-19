@@ -12,7 +12,7 @@ router.put(
     auth,
     async (req, res) => {
         const id = req.params.id;
-        const updateWith = req.body.updateWith;
+        const updateWith = req.query;
         try{
             let data = await uc.getById(id);
 
@@ -57,7 +57,7 @@ router.put(
 
 
 router.put('/self', auth, async (req, res) => {
-    const updateWith = req.body.updateWith;
+    const updateWith = req.query;
     try{
         const user = await uc.update(req.user.id, updateWith);
         res.status(200).json(user);
