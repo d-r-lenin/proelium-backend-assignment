@@ -14,11 +14,13 @@ const PORT = process.env.PORT || 3000;
 const app = express();
 
 //Loading middlewares
-const { auth } = require("./helpers/middlewares");
+const { auth , adminsOnly } = require("./helpers/middlewares");
 
 // using middlewares
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+//Addind routes
+app.use("/add", require("./routes/add"));
 
 //Connecting to database
 mongoose.connect(process.env.DB_STRING, (e) => {
@@ -39,18 +41,6 @@ app.get("/", auth, (req, res) => {
     res.send("WellCome!!");
 });
 
-//to add a User or Admin
-app.post('/add',async(req,res)=>{
-    const data = req.body;
-
-    const user = await uc.add(data);
-    if(user === null){
-        res.status(400).json({
-            message:"User already exist"
-        })
-    }
-    res.status(200).json(user);
-});
 
 //to get a User or Admin
 app.get('/view',(req,res)=>{
@@ -108,17 +98,11 @@ app.post('/get/token', async (req,res)=>{
 });
 
 //get all users and admins
-app.get('/get/all', auth, async(req,res)=>{
+app.get('/get/all', auth, adminsOnly, async(req,res)=>{
     //check if user is admin
-    if(req.user.role === 'admin'){
-        const users = await uc.getAll();
-        res.status(200).json({
-            users:users
-        });
-    }else{
-        //if user is not admin then send error message
-        res.status(403).json({
-            message:"Authorization required"
-        });
-    }
+    const users = await uc.getAll();
+    res.status(200).json({
+        users:users
+    });
+
 })

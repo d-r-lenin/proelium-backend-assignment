@@ -1,4 +1,3 @@
-const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 
 const saltRounds = 10;
@@ -9,6 +8,7 @@ const User = require('../models/Users');
 //Controller Object to perform users related operations
 class UserControl {
     constructor() {
+        //Model is a mongoose model for Users
         this.Model = User;
     }
     
@@ -67,11 +67,13 @@ class UserControl {
         });
 
         // checks all required fields are present 
-        const isValid = !isEmailExist ||
-                        !user.firstName ||
-                        !user.lastName ||
-                        !user.email ||
-                        !user.role;
+        const isValid = (
+            isEmailExist &&
+            user.firstName &&
+            user.lastName &&
+            user.email &&
+            user.role
+        );
         
         if(!isValid){
             return false;
