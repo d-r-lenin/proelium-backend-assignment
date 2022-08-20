@@ -41,6 +41,7 @@ class UserControl {
 
         // hashing the password using bcrypt
         user.password = await bcrypt.hash(user.password, saltRounds);
+        await user.save();
         user.password = undefined;
         return user;
     }
