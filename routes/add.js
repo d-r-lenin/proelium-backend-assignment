@@ -13,7 +13,7 @@ router.post(
     dataRequired, 
     async (req, res) => {
         try{
-            const data = req.query;
+            const data = req.body;
             let user;
             //check if user is admin or "user is adding another user"
             const isAuthValid = (

@@ -125,6 +125,7 @@ class UserControl {
             return false;
         } else {
             // changing role to lowercase to avoid case sensitive
+
             user.role = user.role.toLowerCase();
             return true
         }

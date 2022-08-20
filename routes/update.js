@@ -12,7 +12,7 @@ router.put(
     auth,
     async (req, res) => {
         const id = req.params.id;
-        const updateWith = req.query;
+        const updateWith = req.body;
         try{
             let data = await uc.getById(id);
 
