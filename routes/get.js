@@ -93,7 +93,6 @@ router.get('/one/by/id/:id', auth, async (req, res) => {
         const fields = req.query.fields; 
 
         let user = await uc.getById(id);
-        console.log(user);
         if (user === null) {
             res.status(400).json({
                 message: "User not found"

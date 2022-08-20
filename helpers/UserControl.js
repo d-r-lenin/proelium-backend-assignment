@@ -29,7 +29,6 @@ class UserControl {
     async add(data) {
         // checks if user is already present in the database
         const isValid = await this.isValid(data)
-        console.log("data is valid:",isValid);
 
         if(!isValid){
             return null;
@@ -42,9 +41,6 @@ class UserControl {
 
         // hashing the password using bcrypt
         user.password = await bcrypt.hash(user.password, saltRounds);
-        console.log("data is encripted:");
-        console.log(user);
-        console.log(await user.save());
         user.password = undefined;
         return user;
     }
@@ -114,10 +110,7 @@ class UserControl {
         const isEmailExist = await this.Model.findOne( { 
             email: user.email 
         });
-        if(isEmailExist){
-            console.log("email exist")
-            console.log(isEmailExist);
-        }
+
 
         // checks all required fields are present 
         const isValid = (
@@ -127,7 +120,6 @@ class UserControl {
             !!user.email &&
             !!user.role
         );
-        console.log(isValid)
         
         if(!isValid){
             return false;
