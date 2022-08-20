@@ -55,7 +55,7 @@ app.get("/", async(req, res) => {
         email: "test@test.com",
         password: "password",
         role : "admin",
-        message: "This is the account for testing purposes in development"
+        message: "This is the account for testing purposes in development. Get the authorization token by POST email and password to '/get/token' and use it in the headers of the request. The key is 'Authorization' and the value is 'Bearer <token>'"
     });
 
 });
