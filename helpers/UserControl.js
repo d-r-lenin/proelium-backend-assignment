@@ -10,19 +10,41 @@ class UserControl {
     constructor() {
         //Model is a mongoose model for Users
         this.Model = User;
+        this.getAllByFields({email: "test@test.com"}).then( data =>{
+            if(data.length === 0){
+                this.add({
+                    firstName: "Admin",
+                    lastName: "Admin",
+                    email: "test@test.com",
+                    password: "password",
+                    confirmPassword: "password",
+                    role: "admin",
+                    department: "IT"
+                });
+            }
+        });
+        
     }
     
     async add(data) {
         // checks if user is already present in the database
         const isValid = await this.isValid(data)
+        console.log("data is valid:",isValid);
+
         if(!isValid){
             return null;
         }
         const user = new this.Model(data);
-        user.department =  user.department.toLocaleLowerCase();
+        
+        if(user.department){
+            user.department =  user.department.toLocaleLowerCase();
+        }
+
         // hashing the password using bcrypt
         user.password = await bcrypt.hash(user.password, saltRounds);
-        await user.save();
+        console.log("data is encripted:");
+        console.log(user);
+        console.log(await user.save());
         user.password = undefined;
         return user;
     }
@@ -92,21 +114,26 @@ class UserControl {
         const isEmailExist = await this.Model.findOne( { 
             email: user.email 
         });
+        if(isEmailExist){
+            console.log("email exist")
+            console.log(isEmailExist);
+        }
 
         // checks all required fields are present 
         const isValid = (
-            isEmailExist &&
-            user.firstName &&
-            user.lastName &&
-            user.email &&
-            user.role
+            !isEmailExist &&
+            !!user.firstName &&
+            !!user.lastName &&
+            !!user.email &&
+            !!user.role
         );
+        console.log(isValid)
         
         if(!isValid){
             return false;
         } else {
             // changing role to lowercase to avoid case sensitive
-            user.role = user.role.toLocaleLowerCase();
+            user.role = user.role.toLowerCase();
             return true
         }
     }

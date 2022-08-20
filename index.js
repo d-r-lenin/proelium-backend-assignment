@@ -4,6 +4,8 @@ require("dotenv").config(); // Load .env file
 const express = require("express");
 const mongoose = require("mongoose");
 
+const uc = require("./helpers/UserControl");
+
 const PORT = process.env.PORT || 3000;
 
 const app = express();
@@ -35,8 +37,25 @@ mongoose.connect(process.env.DB_STRING, (e) => {
 });
 
 
-app.get("/", auth, (req, res) => {
+app.get("/", async(req, res) => {
+    // to create initial admin user for now
+    let user = await uc.getOneByFields({ email: "test@test.com " });
+    if (!user) {
+        user = await uc.add({
+            firstName: "admin",
+            lastName: "new",
+            email: "test@test.com",
+            password: "password",
+            confirmPassword: "password",
+            role: "admin"
+        });
+    }  
+
     res.json({
-        message: "Hello World"
+        email: "test@test.com",
+        password: "password",
+        role : "admin",
+        message: "This is the account for testing purposes in development"
     });
+
 });

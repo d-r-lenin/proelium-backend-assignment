@@ -212,7 +212,9 @@ router.post('/token', async (req,res)=>{
         //if correct then generate token
         const userData = await uc.check(email , password);
         //if not exist then throw error to catch block
-        if(!userData.email) throw new Error(userData);
+        if(!userData.email){
+            throw new Error(userData);
+        }
         //generating jwt token
         const token = jwt.sign({
                 id:userData._id,
